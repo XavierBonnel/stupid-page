@@ -6,6 +6,7 @@ function App() {
   const [backgroundColor, setBackgroundColor] = useState("grey");
   const [gifUrl, setGifUrl] = useState("");
   const [jokeQuote, setJokeQuote] = useState("");
+  const [isFetching, setIsFetching] = useState(false); // Nouvel état pour éviter une boucle de mise à jour infinie
 
   const GiphyApiKey = process.env.REACT_APP_GIPHY_API_KEY;
 
@@ -27,10 +28,12 @@ function App() {
   // Function to fetch a random GIF using the Giphy API
   async function getGif() {
     try {
+      setIsFetching(true); // Définir isFetching sur true avant de commencer la requête
       const response = await fetch(`${GIPHY_API}&${Date.now()}`);
       const data = await response.json();
       const gif = data.data.images.original.url;
       setGifUrl(gif);
+      setIsFetching(false); // Définir isFetching sur false après avoir terminé la requête
     } catch (error) {
       console.error("Failed to get GIF:", error);
     }
@@ -64,9 +67,12 @@ function App() {
 
         <button
           onClick={() => {
-            getGif();
-            getJoke();
-            setBackgroundColor(getRandomColor());
+            if (!isFetching) {
+              // Vérifier si une requête est déjà en cours
+              getGif();
+              getJoke();
+              setBackgroundColor(getRandomColor());
+            }
           }}
           className="button"
         >
